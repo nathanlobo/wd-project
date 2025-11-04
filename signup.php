@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/db.php';
+require_once __DIR__ . '/includes/mail_config.php';
 session_start();
 
 $errors = [];
@@ -41,17 +42,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        $stmt = $db->prepare('INSERT INTO users (username, email, password_hash, display_name, profile_pic) VALUES (?, ?, ?, ?, ?)');
-        $stmt->bind_param('sssss', $username, $email, $hash, $display, $profile_pic);
-        if ($stmt->execute()) {
-            $_SESSION['user_id'] = $stmt->insert_id;
-            $stmt->close();
-            $db->close();
-            header('Location: index.php');
-            exit;
-        } else {
-            $errors[] = 'Failed to create account.';
-        }
+    // Detect if email verification columns exist
+    $hasVerified = false;
+    if ($result = $db->query("SHOW COLUMNS FROM users LIKE 'email_verified'")) {
+      $hasVerified = $result->num_rows > 0;
+      $result->close();
+    }
+
+    if ($hasVerified) {
+      $stmt = $db->prepare('INSERT INTO users (username, email, password_hash, display_name, profile_pic, email_verified) VALUES (?, ?, ?, ?, ?, 0)');
+      $stmt->bind_param('sssss', $username, $email, $hash, $display, $profile_pic);
+    } else {
+      $stmt = $db->prepare('INSERT INTO users (username, email, password_hash, display_name, profile_pic) VALUES (?, ?, ?, ?, ?)');
+      $stmt->bind_param('sssss', $username, $email, $hash, $display, $profile_pic);
+    }
+
+    if ($stmt && $stmt->execute()) {
+      $newUserId = $stmt->insert_id;
+      $stmt->close();
+
+      // If verification schema is present, go through OTP verification
+      $hasCodesTable = false;
+      if ($res2 = $db->query("SHOW TABLES LIKE 'email_verification_codes'")) {
+        $hasCodesTable = $res2->num_rows > 0;
+        $res2->close();
+      }
+
+      if ($hasVerified && $hasCodesTable) {
+        $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $expires_at = date('Y-m-d H:i:s', time() + 600); // 10 minutes
+        $stmt2 = $db->prepare('DELETE FROM email_verification_codes WHERE user_id = ?');
+        $stmt2->bind_param('i', $newUserId);
+        $stmt2->execute();
+        $stmt2->close();
+        $stmt2 = $db->prepare('INSERT INTO email_verification_codes (user_id, code, expires_at) VALUES (?, ?, ?)');
+        $stmt2->bind_param('iss', $newUserId, $code, $expires_at);
+        $stmt2->execute();
+        $stmt2->close();
+
+        // Send email with OTP
+        $displayName = $display ?: $username;
+        send_otp_email($email, $displayName, $code);
+
+        // Store pending verification session
+        $_SESSION['pending_user_id'] = $newUserId;
+        $_SESSION['pending_user_email'] = $email;
+        $_SESSION['pending_user_name'] = $displayName;
+
+        $db->close();
+        header('Location: verify_email.php');
+        exit;
+      } else {
+        // Fallback: log them in immediately (no verification schema)
+        $_SESSION['user_id'] = $newUserId;
+        $db->close();
+        header('Location: profile.php');
+        exit;
+      }
+    } else {
+      if ($stmt) $stmt->close();
+      $db->close();
+      $errors[] = 'Failed to create account.';
+    }
     }
 }
 ?>
@@ -61,23 +113,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Sign up - Codegram</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth.css">
+  <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
 </head>
 <body class="auth-page">
-  <main style="max-width:420px;margin:40px auto;padding:24px;background:#fff;border:1px solid #e6e6e6;border-radius:6px">
-    <h2>Create account</h2>
-    <?php if ($errors): ?>
-      <div style="color:#b00020;margin-bottom:12px"><?php echo implode('<br>', array_map('htmlspecialchars', $errors)); ?></div>
-    <?php endif; ?>
-    <form method="post" enctype="multipart/form-data">
-      <label>Username<br><input name="username" required></label><br><br>
-      <label>Email<br><input name="email" type="email" required></label><br><br>
-      <label>Password<br><input name="password" type="password" required></label><br><br>
-      <label>Display name (optional)<br><input name="display_name"></label><br><br>
-      <label>Profile picture (optional)<br><input name="profile_pic" type="file" accept="image/*"></label><br><br>
-      <button type="submit">Sign up</button>
-    </form>
-    <p>Already have an account? <a href="login.php">Log in</a></p>
-  </main>
+    <div class="login-container">
+        <h2>CodeGram</h2>
+        <?php if ($errors): ?>
+          <div class="error-message"><?php echo implode('<br>', array_map('htmlspecialchars', $errors)); ?></div>
+        <?php endif; ?>
+        <form method="post" enctype="multipart/form-data">
+          <div class="input-container">
+            <input type="email" name="email" required placeholder=" ">
+            <label for="email">Email</label>
+          </div>
+          <div class="input-container">
+            <input type="text" name="username" required placeholder=" ">
+            <label for="username">Username</label>
+          </div>
+          <div class="input-container">
+            <input type="text" name="display_name" required placeholder=" ">
+            <label for="display_name">Full name</label>
+          </div>
+          <div class="input-container">
+            <input type="password" name="password" required placeholder=" ">
+            <label for="password">Enter password</label>
+          </div>
+            <button type="submit">Sign up</button>
+            <div class="signup-option">
+                Already have an account? <a href="login.php" class="signup-link">Log in</a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

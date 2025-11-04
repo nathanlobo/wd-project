@@ -29,5 +29,4 @@ function current_user() {
     $db->close();
     return $user ?: null;
 }
-
 ?>

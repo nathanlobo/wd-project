@@ -24,9 +24,13 @@ $db->close();
   <body>
     <header class="topbar">
       <div class="topbar-inner">
-        <div class="logo"><span class="brand">Codegram</span></div>
-        <div class="search"><input placeholder="Search"></div>
-        <div class="topbar-right"><a href="logout.php">Logout</a></div>
+        <div class="logo">
+          <svg viewBox="0 0 24 24" class="camera" aria-hidden="true"><path d="M12 7a5 5 0 100 10 5 5 0 000-10z" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="3" width="20" height="18" rx="4" ry="4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+          <span class="brand">Codegram</span>
+        </div>
+        <div class="search">
+          <input type="search" placeholder="Search" aria-label="Search" />
+        </div>
       </div>
     </header>
 
@@ -35,10 +39,6 @@ $db->close();
         <?php include __DIR__ . '/index.html'; /* reuse left-nav markup from index.html for now */ ?>
         <section class="layout">
           <section class="feed">
-            <div style="margin:12px 0;display:flex;justify-content:space-between;align-items:center">
-              <div>Welcome, <?php echo htmlspecialchars($me['username']); ?></div>
-              <div><a href="upload_post.php">Create post</a> • <a href="profile.php?u=<?php echo urlencode($me['username']); ?>">My profile</a></div>
-            </div>
             <?php foreach ($posts as $post): ?>
               <article class="post">
                 <header class="post-header">

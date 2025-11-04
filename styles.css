@@ -23,7 +23,7 @@ body{
 .search{flex:1;display:flex;justify-content:center}
 .search input{width:100%;max-width:300px;padding:8px 10px;border:1px solid #dbdbdb;border-radius:6px;background:#fafafa}
 .icons{display:flex;align-items:center;gap:8px}
-.icons .icon,.icons .avatar-btn{background:none;border:0;padding:6px;border-radius:6px;cursor:pointer}
+.icons .icon{background:none;border:0;padding:6px;border-radius:6px;cursor:pointer}
 
 /* Layout */
 .main{padding:20px 0}
@@ -35,14 +35,15 @@ body{
 .sidebar{width:320px}
 
 /* Left vertical navigation */
-.left-nav{width:96px;flex:0 0 96px}
-.left-nav ul{list-style:none;margin:0;padding:12px 8px;display:flex;flex-direction:column;gap:6px}
-.left-nav .nav-item button{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222}
+.left-nav{width:96px;flex:0 0 96px;position:sticky;top:70px;height:calc(100vh - 90px)}
+.left-nav ul{list-style:none;margin:0;padding:12px 8px;display:flex;flex-direction:column;gap:6px;height:100%}
+.left-nav .nav-item button,.left-nav .nav-item a{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222}
 .left-nav .nav-item .icon{width:22px;height:22px}
 .left-nav .nav-avatar{width:28px;height:28px;border-radius:50%;background:#bbb}
 .left-nav .label{font-size:13px;display:none;color:#222}
-.left-nav .nav-item.active button,.left-nav .nav-item button:hover{background:rgba(0,0,0,0.04)}
+.left-nav .nav-item.active button,.left-nav .nav-item button:hover,.left-nav .nav-item a:hover{background:rgba(0,0,0,0.04)}
 .left-nav .nav-item.active button,.left-nav .nav-item.active .label{color:var(--accent)}
+.left-nav .nav-logout{margin-top:auto}
 
 /* show labels on wider screens */
 @media (min-width:1100px){
@@ -72,10 +73,8 @@ body{
 .post-caption{padding:6px 12px;color:#111}
 .post-time{padding:8px 12px 12px;font-size:12px;color:var(--muted)}
 
-/* Sidebar */
 .profile-brief{display:flex;align-items:center;gap:12px;padding:12px}
 .avatar.large{width:56px;height:56px;border-radius:50%;background:#ccc}
-.avatar.small{width:28px;height:28px;border-radius:50%;background:#ccc}
 .profile-info .name{font-weight:700}
 .profile-info .sub{color:var(--muted);font-size:13px}
 .suggestions{background:transparent;padding:8px 12px}
@@ -87,20 +86,4 @@ body{
 .s-sub{font-size:12px;color:var(--muted)}
 .follow{background:none;border:0;color:var(--accent);font-weight:600;cursor:pointer}
 .sidebar-foot{margin-top:14px;padding:0 12px;color:var(--muted);font-size:12px}
-
-/* Helpers */
 .avatar{background:#bbb}
-
-/* Responsive */
-
-@media (max-width:900px){
-  .app-inner{padding:0 12px}
-  .sidebar{display:none}
-  .left-nav{display:none}
-}
-
-@media (max-width:600px){
-  .brand{display:none}
-  .search input{max-width:160px}
-  .post-image .placeholder{height:360px}
-}

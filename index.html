@@ -7,25 +7,6 @@
         <link rel="stylesheet" href="styles.css" />
     </head>
     <body>
-        <header class="topbar">
-            <div class="topbar-inner">
-                <div class="logo">
-                    <svg viewBox="0 0 24 24" class="camera" aria-hidden="true"><path d="M12 7a5 5 0 100 10 5 5 0 000-10z" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="3" width="20" height="18" rx="4" ry="4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
-                    <span class="brand">Codergram</span>
-                </div>
-
-                <div class="search">
-                    <input type="search" placeholder="Search" aria-label="Search" />
-                </div>
-
-                <!-- keep only profile in topbar on desktop/tablet -->
-                <div class="topbar-right">
-                    <button class="avatar-btn" aria-label="Profile">
-                        <div class="avatar small"></div>
-                    </button>
-                </div>
-            </div>
-        </header>
         <main class="main">
             <div class="app-inner">
                 <!-- Left vertical nav (desktop) -->
@@ -62,16 +43,22 @@
                             </button>
                         </li>
                         <li class="nav-item" data-key="create">
-                            <button aria-label="Create">
+                            <a href="upload_post.php" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222;text-decoration:none" aria-label="Create">
                                 <svg viewBox="0 0 24 24" class="icon"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M12 7v10M7 12h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
                                 <span class="label">Create</span>
-                            </button>
+                            </a>
                         </li>
                         <li class="nav-item" data-key="profile">
-                            <button aria-label="Profile">
+                            <a href="profile.php" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222;text-decoration:none" aria-label="Profile">
                                 <div class="avatar nav-avatar"></div>
                                 <span class="label">Profile</span>
-                            </button>
+                            </a>
+                        </li>
+                        <li class="nav-item nav-logout" data-key="logout">
+                            <a href="logout.php" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222;text-decoration:none" aria-label="Logout">
+                                <svg viewBox="0 0 24 24" class="icon"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                <span class="label">Logout</span>
+                            </a>
                         </li>
                     </ul>
                 </nav>
@@ -159,9 +146,8 @@
                     <footer class="sidebar-foot">About • Help • Terms</footer>
                 </aside>
             </section>
+            </div>
         </main>
         <script src="script.js"></script>
     </body>
-</html>
-</body>
 </html>

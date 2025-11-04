@@ -1,0 +1,150 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f2f5; /* Fallback color */
+    /* background-image: url("bg_img1.jpg"); */ /* User needs to provide this image */
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    margin:0;
+}
+.login-container {
+    background-color: white;
+    padding: 2rem 3rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 380px;
+    text-align: center;
+}
+.login-container h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #808080;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 24px;
+}
+.login-container form {
+    display: flex;
+    flex-direction: column;
+}
+.login-container label {
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #555;
+    text-align: left;
+}
+.login-container input[type="text"],
+.login-container input[type="password"],
+.login-container input[type="email"],
+.login-container input[type="file"] {
+    padding: 0.75rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+.login-container input[type="text"]:focus,
+.login-container input[type="password"]:focus,
+.login-container input[type="email"]:focus,
+.login-container input[type="file"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+.login-container button {
+    padding: 0.75rem;
+    background-color: #373737;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.login-container button:hover {
+    background-color: #1c1d1d;
+}
+.password-options {
+    text-align: right;
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+.forgot-password {
+    color: #363737;
+    text-decoration: none;
+}
+.forgot-password:hover {
+    text-decoration: underline;
+    color: black;
+}
+.signup-option {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #555;
+}
+.signup-link {
+    color: #000;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: text-decoration 0.3s ease;
+}
+.signup-link:hover {
+    text-decoration: underline;
+}
+.error-message {
+    color: #b00020;
+    margin-bottom: 12px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.success-message {
+    color: #155724;
+    margin-bottom: 12px;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+/* Floating label input container */
+.input-container {
+    position: relative;
+    margin-bottom: 8px; /* Adjust as needed */
+}
+
+.input-container input, input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    outline: none;
+    font-size: 16px;
+}
+
+.input-container label {
+    position: absolute;
+    top: 12px;
+    left: 10px;
+    color: #999;
+    pointer-events: none; /* Allows clicking through the label to the input */
+    transition: 0.2s ease all; /* Smooth animation */
+}
+
+.input-container input:focus + label,input[type="email"], input[type="password"]:focus + label,
+.input-container input:not(:placeholder-shown)+label,input[type="email"],input[type="password"]:not(:placeholder-shown) + label{
+    top: -15px; /* Moves label up */
+    font-size: 13px; /* Shrinks label */
+    color: #333; /* Changes color */
+}
