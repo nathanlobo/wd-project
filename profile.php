@@ -69,63 +69,7 @@ if (!$user) {
 
     <main class="main">
         <div class="app-inner">
-            <!-- Left vertical nav -->
-            <nav class="left-nav" aria-label="Main navigation">
-                <ul>
-                    <li class="nav-item" data-key="home">
-                        <a href="index.php" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222;text-decoration:none" aria-label="Home">
-                            <svg viewBox="0 0 24 24" class="icon"><path d="M3 11.5L12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V11.5z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
-                            <span class="label">Home</span>
-                        </a>
-                    </li>
-                    <li class="nav-item" data-key="explore">
-                        <button aria-label="Explore">
-                            <svg viewBox="0 0 24 24" class="icon"><path d="M12 2l3.1 6.3L22 9.2l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.1 2 9.2l6.9-0.9L12 2z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
-                            <span class="label">Explore</span>
-                        </button>
-                    </li>
-                    <li class="nav-item" data-key="reels">
-                        <button aria-label="Reels">
-                            <svg viewBox="0 0 24 24" class="icon"><rect x="3" y="5" width="18" height="14" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M10 9l5 3-5 3V9z" fill="currentColor"/></svg>
-                            <span class="label">Reels</span>
-                        </button>
-                    </li>
-                    <li class="nav-item" data-key="messages">
-                        <button aria-label="Messages">
-                            <svg viewBox="0 0 24 24" class="icon"><path d="M21 6.5L12 13 3 6.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 7v9a2 2 0 0 0 2 2h11" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
-                            <span class="label">Messages</span>
-                        </button>
-                    </li>
-                    <li class="nav-item" data-key="notifications">
-                        <button aria-label="Notifications">
-                            <svg viewBox="0 0 24 24" class="icon"><path d="M15 17H9a3 3 0 0 0 6 0z" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
-                            <span class="label">Notifications</span>
-                        </button>
-                    </li>
-                    <li class="nav-item" data-key="create">
-                        <a href="upload_post.php" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222;text-decoration:none" aria-label="Create">
-                            <svg viewBox="0 0 24 24" class="icon"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M12 7v10M7 12h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-                            <span class="label">Create</span>
-                        </a>
-                    </li>
-                    <li class="nav-item active" data-key="profile">
-                        <a href="profile.php" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222;text-decoration:none" aria-label="Profile">
-                            <?php if ($user['profile_pic']): ?>
-                                <img src="<?php echo htmlspecialchars($user['profile_pic']); ?>" alt="Profile" class="nav-avatar" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">
-                            <?php else: ?>
-                                <div class="avatar nav-avatar"></div>
-                            <?php endif; ?>
-                            <span class="label">Profile</span>
-                        </a>
-                    </li>
-                    <li class="nav-item" data-key="logout">
-                        <a href="logout.php" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222;text-decoration:none" aria-label="Logout">
-                            <svg viewBox="0 0 24 24" class="icon"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            <span class="label">Logout</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
+            <?php include __DIR__ . '/left-nav.php'; ?>
 
             <section class="layout">
                 <div class="profile-main">
@@ -177,6 +121,10 @@ if (!$user) {
                     <span class="tab-icon">▦</span>
                     <span class="tab-label">POSTS</span>
                 </button>
+                <button class="tab-btn" data-tab="codeas">
+                    <span class="tab-icon">🎬</span>
+                    <span class="tab-label">CODEAS</span>
+                </button>
                 <button class="tab-btn" data-tab="saved">
                     <span class="tab-icon">🔖</span>
                     <span class="tab-label">SAVED</span>
@@ -205,6 +153,41 @@ if (!$user) {
                                     <div class="grid-stats">
                                         <span>❤️ 0</span>
                                         <span>💬 0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+            
+            <div class="tab-content" id="codeas-tab" style="display:none;">
+                <?php
+                // Fetch user's codeas (short videos)
+                $db = db_connect();
+                $codea_stmt = $db->prepare('SELECT id, video_path, caption, created_at FROM codeas WHERE user_id = ? ORDER BY created_at DESC');
+                $codea_stmt->bind_param('i', $user['id']);
+                $codea_stmt->execute();
+                $user_codeas = $codea_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                $codea_stmt->close();
+                $db->close();
+                ?>
+                <?php if (empty($user_codeas)): ?>
+                    <div class="empty-state">
+                        <div class="empty-icon">🎬</div>
+                        <h2>No Codeas Yet</h2>
+                        <p>Share short videos and they'll show up here.</p>
+                    </div>
+                <?php else: ?>
+                    <div class="posts-grid">
+                        <?php foreach ($user_codeas as $c): ?>
+                            <div class="grid-item">
+                                <video src="<?php echo htmlspecialchars($c['video_path']); ?>" class="grid-media" muted loop></video>
+                                <div class="video-indicator">▶</div>
+                                <div class="grid-overlay">
+                                    <div class="grid-stats">
+                                        <span>❤️ <?php // placeholder ?></span>
+                                        <span>💬 <?php // placeholder ?></span>
                                     </div>
                                 </div>
                             </div>

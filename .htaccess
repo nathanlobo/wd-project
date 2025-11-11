@@ -1,0 +1,22 @@
+# Enable URL Rewriting
+RewriteEngine On
+RewriteBase /Nathan/wd-project/
+
+# Redirect root to index.php
+RewriteRule ^$ index.php [L]
+
+# Rewrite clean URLs to .php files
+# Example: /messages -> messages.php, /profile -> profile.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^([^/]+)/?$ $1.php [L,QSA]
+
+# Handle API routes (keep /api/ paths as-is)
+RewriteCond %{REQUEST_URI} ^/Nathan/wd-project/api/
+RewriteRule ^(.*)$ $1 [L]
+
+# Handle static files (Media, CSS, JS)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^(.*)$ $1 [L]

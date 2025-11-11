@@ -20,6 +20,75 @@ $db->close();
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Codegram — Home</title>
     <link rel="stylesheet" href="styles.css" />
+    <style>
+      .search {
+        position: relative;
+      }
+      
+      .search-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #e6e6e6;
+        border-radius: 8px;
+        margin-top: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        max-height: 400px;
+        overflow-y: auto;
+        z-index: 1000;
+      }
+      
+      .search-dropdown.active {
+        display: block;
+      }
+      
+      .search-result {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: background 0.2s;
+        text-decoration: none;
+        color: inherit;
+      }
+      
+      .search-result:hover {
+        background: #f5f5f5;
+      }
+      
+      .search-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #e6e6e6;
+      }
+      
+      .search-info {
+        flex: 1;
+      }
+      
+      .search-username {
+        font-weight: 600;
+        font-size: 14px;
+      }
+      
+      .search-fullname {
+        font-size: 14px;
+        color: #666;
+      }
+      
+      .search-empty {
+        padding: 20px;
+        text-align: center;
+        color: #666;
+        font-size: 14px;
+      }
+    </style>
   </head>
   <body>
     <header class="topbar">
@@ -29,14 +98,15 @@ $db->close();
           <span class="brand">Codegram</span>
         </div>
         <div class="search">
-          <input type="search" placeholder="Search" aria-label="Search" />
+          <input type="search" id="searchInput" placeholder="Search" aria-label="Search" autocomplete="off" />
+          <div class="search-dropdown" id="searchDropdown"></div>
         </div>
       </div>
     </header>
 
     <main class="main">
       <div class="app-inner">
-        <?php include __DIR__ . '/index.html'; /* reuse left-nav markup from index.html for now */ ?>
+        <?php include __DIR__ . '/left-nav.php'; ?>
         <section class="layout">
           <section class="feed">
             <?php foreach ($posts as $post): ?>
@@ -69,5 +139,60 @@ $db->close();
     </main>
 
     <script src="script.js"></script>
+    <script>
+      // Search functionality
+      const searchInput = document.getElementById('searchInput');
+      const searchDropdown = document.getElementById('searchDropdown');
+      let searchTimeout;
+      
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        
+        clearTimeout(searchTimeout);
+        
+        if (query.length < 1) {
+          searchDropdown.classList.remove('active');
+          return;
+        }
+        
+        searchTimeout = setTimeout(async () => {
+          try {
+            const res = await fetch(`api/search_users.php?q=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            
+            if (data.success && data.users.length > 0) {
+              searchDropdown.innerHTML = data.users.map(user => `
+                <a href="profile.php?user_id=${user.id}" class="search-result">
+                  <img src="${user.profile_pic || 'Media/dp/default.png'}" class="search-avatar">
+                  <div class="search-info">
+                    <div class="search-username">${user.username}</div>
+                    ${user.display_name ? `<div class="search-fullname">${user.display_name}</div>` : ''}
+                  </div>
+                </a>
+              `).join('');
+              searchDropdown.classList.add('active');
+            } else {
+              searchDropdown.innerHTML = '<div class="search-empty">No users found</div>';
+              searchDropdown.classList.add('active');
+            }
+          } catch (err) {
+            console.error('Search error:', err);
+          }
+        }, 300);
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search')) {
+          searchDropdown.classList.remove('active');
+        }
+      });
+      
+      searchInput.addEventListener('focus', () => {
+        if (searchInput.value.trim().length > 0 && searchDropdown.innerHTML) {
+          searchDropdown.classList.add('active');
+        }
+      });
+    </script>
   </body>
 </html>

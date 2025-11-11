@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <label>Caption<br><textarea name="caption" rows="3" style="width:100%"></textarea></label><br><br>
       <button type="submit">Upload</button>
     </form>
-    <p><a href="index.php">Back to feed</a></p>
+    <p><a href="/Nathan/wd-project/">Back to feed</a></p>
   </main>
 </body>
 </html>

@@ -326,11 +326,11 @@ $db->close();
 <body>
     <div class="topbar">
         <div class="topbar-inner">
-            <a class="logo" href="index.php">
+            <a class="logo" href="/Nathan/wd-project/">
                 <span class="brand">Codegram</span>
             </a>
             <div class="icons">
-                <a href="profile.php" class="icon" title="Profile">👤</a>
+                <a href="profile" class="icon" title="Profile">👤</a>
                 <a href="logout.php" class="icon" title="Logout">🚪</a>
             </div>
         </div>
@@ -344,7 +344,7 @@ $db->close();
             
             <?php if ($success): ?>
                 <div class="success-banner">
-                    ✓ Profile updated successfully! <a href="profile.php" style="color:#155724;text-decoration:underline">View profile</a>
+                    ✓ Profile updated successfully! <a href="profile" style="color:#155724;text-decoration:underline">View profile</a>
                 </div>
             <?php endif; ?>
             
@@ -412,7 +412,7 @@ $db->close();
                 </div>
                 
                 <div class="form-actions">
-                    <a href="profile.php" class="btn-cancel" style="text-decoration:none;display:inline-flex;align-items:center">Cancel</a>
+                    <a href="profile" class="btn-cancel" style="text-decoration:none;display:inline-flex;align-items:center">Cancel</a>
                     <button type="submit" class="btn-save">Save Changes</button>
                 </div>
             </form>
