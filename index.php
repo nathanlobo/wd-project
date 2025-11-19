@@ -21,13 +21,53 @@ $db->query("CREATE TABLE IF NOT EXISTS saved_posts (
 
 $posts = [];
 $user_id = $_SESSION['user_id'];
-$res = $db->query("SELECT p.*, u.username, u.profile_pic, u.display_name, 
-                   (SELECT COUNT(*) FROM saved_posts WHERE user_id = $user_id AND post_id = p.id AND post_type = 'post') as is_saved
-                   FROM posts p 
-                   JOIN users u ON p.user_id = u.id 
-                   ORDER BY RAND() LIMIT 50");
-while ($row = $res->fetch_assoc()) $posts[] = $row;
-$res->free();
+
+// Fetch both posts and codeas combined
+$query = "
+    SELECT 
+        p.id,
+        p.user_id,
+        p.caption COLLATE utf8mb4_unicode_ci as caption,
+        p.media_path COLLATE utf8mb4_unicode_ci as media_path,
+        p.media_type COLLATE utf8mb4_unicode_ci as media_type,
+        p.created_at,
+        u.username COLLATE utf8mb4_unicode_ci as username,
+        u.profile_pic COLLATE utf8mb4_unicode_ci as profile_pic,
+        u.display_name COLLATE utf8mb4_unicode_ci as display_name,
+        'post' as content_type,
+        (SELECT COUNT(*) FROM saved_posts WHERE user_id = $user_id AND post_id = p.id AND post_type = 'post') as is_saved
+    FROM posts p
+    JOIN users u ON p.user_id = u.id
+    
+    UNION ALL
+    
+    SELECT 
+        c.id,
+        c.user_id,
+        c.caption COLLATE utf8mb4_unicode_ci as caption,
+        c.video_path COLLATE utf8mb4_unicode_ci as media_path,
+        'video' COLLATE utf8mb4_unicode_ci as media_type,
+        c.created_at,
+        u.username COLLATE utf8mb4_unicode_ci as username,
+        u.profile_pic COLLATE utf8mb4_unicode_ci as profile_pic,
+        u.display_name COLLATE utf8mb4_unicode_ci as display_name,
+        'codea' as content_type,
+        (SELECT COUNT(*) FROM saved_posts WHERE user_id = $user_id AND post_id = c.id AND post_type = 'codea') as is_saved
+    FROM codeas c
+    JOIN users u ON c.user_id = u.id
+    
+    ORDER BY RAND()
+";
+
+$res = $db->query($query);
+
+if ($res) {
+    while ($row = $res->fetch_assoc()) $posts[] = $row;
+    $res->free();
+} else {
+    error_log("Query error: " . $db->error);
+}
+
 $db->close();
 ?>
 <!doctype html>
@@ -154,7 +194,7 @@ $db->close();
                   <button class="btn like" aria-pressed="false">♡</button>
                   <button class="btn">💬</button>
                   <div class="spacer"></div>
-                  <button class="btn save" data-post-id="<?php echo $post['id']; ?>" title="<?php echo $post['is_saved'] ? 'Unsave' : 'Save'; ?>" onclick="savePost(this, <?php echo $post['id']; ?>)" style="color:<?php echo $post['is_saved'] ? '#ffc107' : 'inherit'; ?>">🔖</button>
+                  <button class="btn save" data-post-id="<?php echo $post['id']; ?>" data-content-type="<?php echo $post['content_type']; ?>" title="<?php echo $post['is_saved'] ? 'Unsave' : 'Save'; ?>" onclick="savePost(this, <?php echo $post['id']; ?>, '<?php echo $post['content_type']; ?>')" style="color:<?php echo $post['is_saved'] ? '#ffc107' : 'inherit'; ?>">🔖</button>
                 </div>
                 <div class="post-likes">— likes</div>
                 <div class="post-caption"><strong><?php echo htmlspecialchars($post['username']); ?></strong> <?php echo htmlspecialchars($post['caption']); ?></div>
@@ -223,14 +263,14 @@ $db->close();
       });
       
       // Save post functionality
-      async function savePost(element, postId) {
+      async function savePost(element, postId, contentType) {
         try {
           const response = await fetch('api/save_post.php', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: `post_id=${postId}&type=post`
+            body: `post_id=${postId}&type=${contentType}`
           });
           const data = await response.json();
           
