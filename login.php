@@ -18,6 +18,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       if (password_verify($pass, $row['password_hash'])) {
         if (!empty($row['email_verified'])) {
           $_SESSION['user_id'] = $row['id'];
+          
+          // Log login activity (create table if not exists)
+          try {
+            $user_id = $row['id'];
+            $ip_address = $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
+            $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
+            
+            // Create table if it doesn't exist
+            $db->query("CREATE TABLE IF NOT EXISTS login_activity (
+              id INT AUTO_INCREMENT PRIMARY KEY,
+              user_id INT NOT NULL,
+              ip_address VARCHAR(45),
+              user_agent TEXT,
+              login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )");
+            
+            $log_stmt = $db->prepare('INSERT INTO login_activity (user_id, ip_address, user_agent) VALUES (?, ?, ?)');
+            if ($log_stmt) {
+              $log_stmt->bind_param('iss', $user_id, $ip_address, $user_agent);
+              $log_stmt->execute();
+              $log_stmt->close();
+            }
+          } catch (Exception $e) {
+            // Silently fail login activity logging if there's an error
+            error_log('Login activity logging failed: ' . $e->getMessage());
+          }
+          
           $stmt->close(); $db->close();
           header('Location: profile.php'); exit;
         } else {

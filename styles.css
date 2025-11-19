@@ -11,7 +11,7 @@ body{
   margin:0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
   background:var(--bg);
-  color:#111;
+  color:var(--text);
 }
 
 /* Topbar */
@@ -37,10 +37,10 @@ body{
 /* Left vertical navigation */
 .left-nav{width:96px;flex:0 0 96px;position:sticky;top:70px;height:calc(100vh - 90px)}
 .left-nav ul{list-style:none;margin:0;padding:12px 8px;display:flex;flex-direction:column;gap:6px;height:100%}
-.left-nav .nav-item button,.left-nav .nav-item a{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222}
+.left-nav .nav-item button,.left-nav .nav-item a{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:var(--text)}
 .left-nav .nav-item .icon{width:22px;height:22px}
 .left-nav .nav-avatar{width:28px;height:28px;border-radius:50%;background:#bbb}
-.left-nav .label{font-size:13px;display:none;color:#222}
+.left-nav .label{font-size:13px;display:none;color:var(--text)}
 .left-nav .nav-item.active button,.left-nav .nav-item button:hover,.left-nav .nav-item a:hover{background:rgba(0,0,0,0.04)}
 .left-nav .nav-item.active button,.left-nav .nav-item.active .label{color:var(--accent)}
 .left-nav .nav-logout{margin-top:auto}
@@ -70,7 +70,7 @@ body{
 .btn.like{font-size:20px}
 .spacer{flex:1}
 .post-likes{font-weight:700;padding:0 12px}
-.post-caption{padding:6px 12px;color:#111}
+.post-caption{padding:6px 12px;color:var(--text)}
 .post-time{padding:8px 12px 12px;font-size:12px;color:var(--muted)}
 
 .profile-brief{display:flex;align-items:center;gap:12px;padding:12px}

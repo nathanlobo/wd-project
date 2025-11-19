@@ -10,15 +10,27 @@ if (!isset($_SESSION['user_id'])) {
 $db = db_connect();
 $current_user = current_user();
 
+// Create saved_posts table if it doesn't exist
+$db->query("CREATE TABLE IF NOT EXISTS saved_posts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    post_id INT NOT NULL,
+    post_type VARCHAR(10) DEFAULT 'post',
+    saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_save (user_id, post_id, post_type),
+    INDEX idx_user_id (user_id)
+)");
+
 // Fetch all codeas with user info
 $query = "SELECT c.*, u.id as user_id, u.username, u.profile_pic,
           (SELECT COUNT(*) FROM codeas_likes WHERE codea_id = c.id AND user_id = ?) as user_liked,
-          (SELECT COUNT(*) FROM follows WHERE follower_id = ? AND following_id = c.user_id) as is_following
+          (SELECT COUNT(*) FROM follows WHERE follower_id = ? AND following_id = c.user_id) as is_following,
+          (SELECT COUNT(*) FROM saved_posts WHERE user_id = ? AND post_id = c.id AND post_type = 'codea') as is_saved
           FROM codeas c
           JOIN users u ON c.user_id = u.id
           ORDER BY c.created_at DESC";
 $stmt = $db->prepare($query);
-$stmt->bind_param('ii', $_SESSION['user_id'], $_SESSION['user_id']);
+$stmt->bind_param('iii', $_SESSION['user_id'], $_SESSION['user_id'], $_SESSION['user_id']);
 $stmt->execute();
 $codeas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
@@ -30,7 +42,9 @@ $db->close();
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Codeas - Codegram</title>
+  <script src="theme.js"></script>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="theme.css">
   <style>
     .codeas-container {
       max-width: 480px;
@@ -326,16 +340,99 @@ $db->close();
       width: 32px;
       height: 32px;
     }
+    
+    /* Search Styles */
+    .search-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin-top: 4px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-height: 400px;
+      overflow-y: auto;
+      display: none;
+      z-index: 1000;
+    }
+    
+    .search-dropdown.active {
+      display: block;
+    }
+    
+    .search-result {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .search-result:hover {
+      background: #f5f5f5;
+    }
+    
+    .search-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #e6e6e6;
+    }
+    
+    .search-info {
+      flex: 1;
+    }
+    
+    .search-username {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .search-fullname {
+      font-size: 13px;
+      color: #737373;
+    }
+    
+    .search-empty {
+      padding: 20px;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    [data-theme="dark"] .search-dropdown {
+      background: var(--card);
+    }
+    
+    [data-theme="dark"] .search-result:hover {
+      background: var(--hover-bg);
+    }
+    
+    [data-theme="dark"] .search-fullname,
+    [data-theme="dark"] .search-empty {
+      color: var(--text-secondary);
+    }
   </style>
 </head>
 <body>
-  <header class="codeas-header">
-    <div class="codeas-logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-        <path d="M12 7a5 5 0 100 10 5 5 0 000-10z"/>
-        <rect x="2" y="3" width="20" height="18" rx="4" ry="4"/>
-      </svg>
-      <span>Codegram</span>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/Nathan/wd-project/" class="logo" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:8px;">
+        <svg viewBox="0 0 24 24" class="camera" aria-hidden="true"><path d="M12 7a5 5 0 100 10 5 5 0 000-10z" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="3" width="20" height="18" rx="4" ry="4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+        <span class="brand">Codegram</span>
+      </a>
+      <div class="search">
+        <input type="search" id="searchInput" placeholder="Search" aria-label="Search" autocomplete="off" />
+        <div class="search-dropdown" id="searchDropdown"></div>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <span class="theme-toggle-slider">🌙</span>
+      </button>
     </div>
   </header>
   
@@ -388,6 +485,9 @@ $db->close();
                 <div class="codea-action" onclick="shareCodea(<?php echo $codea['id']; ?>)">
                   <div class="action-icon">📤</div>
                   <div class="action-count"><?php echo $codea['shares_count']; ?></div>
+                </div>
+                <div class="codea-action" onclick="saveCodea(this, <?php echo $codea['id']; ?>)">
+                  <div class="action-icon" style="color:<?php echo $codea['is_saved'] ? '#ffc107' : 'white'; ?>">🔖</div>
                 </div>
               </div>
             </div>
@@ -564,6 +664,31 @@ $db->close();
         document.getElementById('shareModal').classList.add('active');
         await loadUsersForShare();
       }
+      
+      async function saveCodea(element, codeaId) {
+        try {
+          const response = await fetch('api/save_post.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `post_id=${codeaId}&type=codea`
+          });
+          const data = await response.json();
+          
+          if (data.success) {
+            // Toggle saved state visually
+            const icon = element.querySelector('.action-icon');
+            if (data.saved) {
+              icon.style.color = '#ffc107';
+            } else {
+              icon.style.color = 'white';
+            }
+          }
+        } catch (error) {
+          console.error('Save error:', error);
+        }
+      }
     
       function closeShare() {
         document.getElementById('shareOverlay').classList.remove('active');
@@ -656,6 +781,60 @@ $db->close();
     // Enable comment submit on Enter
     document.getElementById('commentInput').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') postComment();
+    });
+    
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const searchDropdown = document.getElementById('searchDropdown');
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      
+      clearTimeout(searchTimeout);
+      
+      if (query.length < 1) {
+        searchDropdown.classList.remove('active');
+        return;
+      }
+      
+      searchTimeout = setTimeout(async () => {
+        try {
+          const res = await fetch(`api/search_users.php?q=${encodeURIComponent(query)}`);
+          const data = await res.json();
+          
+          if (data.success && data.users.length > 0) {
+            searchDropdown.innerHTML = data.users.map(user => `
+              <a href="profile.php?user_id=${user.id}" class="search-result">
+                <img src="${user.profile_pic || 'Media/dp/default.png'}" class="search-avatar">
+                <div class="search-info">
+                  <div class="search-username">${user.username}</div>
+                  ${user.display_name ? `<div class="search-fullname">${user.display_name}</div>` : ''}
+                </div>
+              </a>
+            `).join('');
+            searchDropdown.classList.add('active');
+          } else {
+            searchDropdown.innerHTML = '<div class="search-empty">No users found</div>';
+            searchDropdown.classList.add('active');
+          }
+        } catch (err) {
+          console.error('Search error:', err);
+        }
+      }, 300);
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.search')) {
+        searchDropdown.classList.remove('active');
+      }
+    });
+    
+    searchInput.addEventListener('focus', () => {
+      if (searchInput.value.trim().length > 0 && searchDropdown.innerHTML) {
+        searchDropdown.classList.add('active');
+      }
     });
   </script>
 </body>

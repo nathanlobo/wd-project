@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
+  // Request browser notification permission
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().then(function(permission) {
+      console.log('Notification permission:', permission);
+    });
+  }
+  
   // Like button toggles
   document.querySelectorAll('.btn.like').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -32,13 +39,15 @@ document.addEventListener('DOMContentLoaded', function () {
   if (leftNav) {
     leftNav.querySelectorAll('.nav-item').forEach(function (li) {
       const btn = li.querySelector('button');
-      btn.addEventListener('click', function () {
-        // remove active from others
-        leftNav.querySelectorAll('.nav-item').forEach(function (other) { other.classList.remove('active'); });
-        li.classList.add('active');
-        // small visual feedback: focus
-        btn.focus();
-      });
+      if (btn) {
+        btn.addEventListener('click', function () {
+          // remove active from others
+          leftNav.querySelectorAll('.nav-item').forEach(function (other) { other.classList.remove('active'); });
+          li.classList.add('active');
+          // small visual feedback: focus
+          btn.focus();
+        });
+      }
     });
   }
 });

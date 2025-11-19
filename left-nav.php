@@ -21,7 +21,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
 <nav class="left-nav" aria-label="Main navigation">
     <ul>
         <li class="nav-item <?php echo ($current_page === 'index') ? 'active' : ''; ?>" data-key="home">
-            <a href="/Nathan/wd-project/" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222;text-decoration:none" aria-label="Home">
+              <a href="/Nathan/wd-project/" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222;text-decoration:none" aria-label="Home">
                 <svg viewBox="0 0 24 24" class="icon"><path d="M3 11.5L12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V11.5z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
                 <span class="label">Home</span>
             </a>
@@ -30,14 +30,6 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
             <a href="codeas" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222;text-decoration:none" aria-label="Codeas">
                 <svg viewBox="0 0 24 24" class="icon"><rect x="3" y="5" width="18" height="14" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M10 9l5 3-5 3V9z" fill="currentColor"/></svg>
                 <span class="label">Codeas</span>
-            </a>
-        </li>
-        <li class="nav-item <?php echo ($current_page === 'messages') ? 'active' : ''; ?>" data-key="messages">
-            <a href="messages" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222;text-decoration:none" aria-label="Messages">
-                <svg viewBox="0 0 24 24" class="icon" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-                <span class="label">Messages</span>
             </a>
         </li>
         <li class="nav-item <?php echo ($current_page === 'notifications') ? 'active' : ''; ?>" data-key="notifications">
@@ -63,9 +55,9 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
             </a>
         </li>
         <li class="nav-item nav-logout" data-key="logout">
-            <a href="logout" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222;text-decoration:none" aria-label="Logout">
+            <a href="#" onclick="return confirmLogout()" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:8px;border-radius:8px;cursor:pointer;color:#222;text-decoration:none" aria-label="Logout">
                 <svg viewBox="0 0 24 24" class="icon" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 0 0 1 2-2h4"/>
+                    <path d="M9 21H5c-1.1 0-2-0.9-2-2V5c0-1.1 0.9-2 2-2h4"/>
                     <polyline points="16 17 21 12 16 7"/>
                     <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
@@ -74,3 +66,12 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
         </li>
     </ul>
 </nav>
+
+<script>
+function confirmLogout() {
+  if (confirm('Are you sure you want to logout?')) {
+    window.location.href = 'logout.php';
+  }
+  return false;
+}
+</script>

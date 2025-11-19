@@ -1,0 +1,440 @@
+/* Dark Mode Styles */
+:root {
+  --bg: #fafafa;
+  --card: #fff;
+  --text: #111;
+  --text-secondary: #666;
+  --muted: #8e8e8e;
+  --accent: #0095f6;
+  --border: #e6e6e6;
+  --hover-bg: rgba(0,0,0,0.04);
+  --input-bg: #fafafa;
+  --max-width: 930px;
+}
+
+[data-theme="dark"] {
+  --bg: #000;
+  --card: #121212;
+  --text: #ffffff;
+  --text-secondary: #e0e0e0;
+  --muted: #b3b3b3;
+  --accent: #0095f6;
+  --border: #262626;
+  --hover-bg: rgba(255,255,255,0.1);
+  --input-bg: #262626;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  position: relative;
+  width: 50px;
+  height: 26px;
+  background: var(--border);
+  border-radius: 13px;
+  cursor: pointer;
+  transition: background 0.3s;
+  border: none;
+  padding: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--muted);
+}
+
+.theme-toggle-slider {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+[data-theme="dark"] .theme-toggle {
+  background: var(--accent);
+}
+
+[data-theme="dark"] .theme-toggle-slider {
+  transform: translateX(24px);
+  background: #fff;
+}
+
+/* Update existing styles to use CSS variables */
+.topbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+
+.post {
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.search input {
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+}
+
+.left-nav .nav-item button,
+.left-nav .nav-item a {
+  color: var(--text);
+}
+
+.left-nav .nav-item.active button:hover,
+.left-nav .nav-item button:hover,
+.left-nav .nav-item a:hover {
+  background: var(--hover-bg);
+}
+
+.post-caption {
+  color: var(--text);
+}
+
+.post-time,
+.story-name,
+.profile-info .sub,
+.suggestions-head,
+.s-sub,
+.sidebar-foot {
+  color: var(--muted);
+}
+
+/* Dark mode for modals */
+.comment-modal,
+.modal-overlay {
+  transition: background 0.3s ease;
+}
+
+[data-theme="dark"] .comment-modal {
+  background: var(--card);
+  color: var(--text);
+}
+
+[data-theme="dark"] .comment-header {
+  border-bottom: 1px solid var(--border);
+}
+
+[data-theme="dark"] .comment-input-container {
+  border-top: 1px solid var(--border);
+}
+
+[data-theme="dark"] .comment-input {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+/* Dark mode for search dropdown */
+[data-theme="dark"] .search-dropdown {
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .search-result:hover {
+  background: var(--hover-bg);
+}
+
+/* Dark mode for create page */
+[data-theme="dark"] .create-container {
+  background: var(--card);
+}
+
+[data-theme="dark"] .create-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+[data-theme="dark"] .upload-zone {
+  border-color: var(--border);
+  background: var(--input-bg);
+}
+
+[data-theme="dark"] .upload-zone:hover {
+  border-color: var(--accent);
+  background: rgba(102, 126, 234, 0.1);
+}
+
+[data-theme="dark"] .form-textarea {
+  background: var(--input-bg);
+  border: 2px solid var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .type-option {
+  border: 2px solid var(--border);
+  background: var(--card);
+}
+
+/* Dark mode for profile */
+[data-theme="dark"] .profile-container {
+  background: var(--card);
+}
+
+[data-theme="dark"] .profile-tabs {
+  border-top: 1px solid var(--border);
+}
+
+[data-theme="dark"] .tab-btn {
+  color: var(--muted);
+  border-bottom: 1px solid transparent;
+}
+
+[data-theme="dark"] .tab-btn.active {
+  color: var(--text);
+  border-bottom: 1px solid var(--text);
+}
+
+/* Dark mode for messages */
+[data-theme="dark"] .messages-wrap,
+[data-theme="dark"] .conversations,
+[data-theme="dark"] .chat-area {
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .conversation-item:hover,
+[data-theme="dark"] .conversation-item.active {
+  background: var(--hover-bg);
+}
+
+/* Dark mode for notifications */
+[data-theme="dark"] .notif-container {
+  background: var(--card);
+}
+
+[data-theme="dark"] .notif-item {
+  border-bottom: 1px solid var(--border);
+}
+
+[data-theme="dark"] .notif-item:hover {
+  background: var(--hover-bg);
+}
+
+[data-theme="dark"] .notif-item.unread {
+  background: rgba(0, 149, 246, 0.1);
+}
+
+[data-theme="dark"] .notif-item.unread:hover {
+  background: rgba(0, 149, 246, 0.15);
+}
+
+[data-theme="dark"] .notif-text {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .notif-time {
+  color: var(--muted) !important;
+}
+
+/* Dark mode for messages */
+[data-theme="dark"] .conv-last {
+  color: var(--text-secondary) !important;
+}
+
+/* Dark mode for codeas */
+[data-theme="dark"] .codeas-container {
+  background: #000;
+}
+
+[data-theme="dark"] .codea-item {
+  color: white;
+}
+
+[data-theme="dark"] .codea-username,
+[data-theme="dark"] .codea-caption {
+  color: white !important;
+}
+
+[data-theme="dark"] .codeas-header {
+  color: white;
+}
+
+/* Dark mode for create page */
+[data-theme="dark"] .create-label {
+  color: var(--text) !important;
+}
+
+[data-theme="dark"] .create-help {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .create-type-label {
+  color: var(--text) !important;
+}
+
+[data-theme="dark"] .error-message {
+  color: #ff6b6b !important;
+}
+
+[data-theme="dark"] .success-message {
+  color: #51cf66 !important;
+}
+
+/* Override inline styles in dark mode */
+[data-theme="dark"] [style*="color:#666"],
+[data-theme="dark"] [style*="color: #666"] {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] [style*="color:#999"],
+[data-theme="dark"] [style*="color: #999"] {
+  color: var(--muted) !important;
+}
+
+[data-theme="dark"] [style*="color:#222"],
+[data-theme="dark"] [style*="color: #222"],
+[data-theme="dark"] [style*="color:#333"],
+[data-theme="dark"] [style*="color: #333"] {
+  color: var(--text) !important;
+}
+
+[data-theme="dark"] [style*="color:white"],
+[data-theme="dark"] [style*="color: white"] {
+  color: white !important;
+}
+
+[data-theme="dark"] [style*="color:black"],
+[data-theme="dark"] [style*="color: black"] {
+  color: var(--text) !important;
+}
+
+/* Override left-nav inline styles */
+[data-theme="dark"] .left-nav a {
+  color: var(--text) !important;
+}
+
+/* Index page overrides */
+[data-theme="dark"] .comment-meta {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .comment-time {
+  color: var(--muted) !important;
+}
+
+/* Comprehensive text color overrides for dark mode */
+[data-theme="dark"] .post-user,
+[data-theme="dark"] .post-caption,
+[data-theme="dark"] .post-likes,
+[data-theme="dark"] .profile-info .name,
+[data-theme="dark"] .s-name,
+[data-theme="dark"] .suggest-meta,
+[data-theme="dark"] .logo,
+[data-theme="dark"] .brand,
+[data-theme="dark"] .topbar,
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] p,
+[data-theme="dark"] span,
+[data-theme="dark"] div {
+  color: var(--text);
+}
+
+/* Search input placeholder */
+[data-theme="dark"] .search input::placeholder {
+  color: var(--muted);
+}
+
+/* Ensure buttons and links are visible */
+[data-theme="dark"] button,
+[data-theme="dark"] a {
+  color: var(--text);
+}
+
+[data-theme="dark"] .follow {
+  color: var(--accent) !important;
+}
+
+/* Dark mode for modals */
+[data-theme="dark"] .modal-content {
+  background: var(--card);
+  color: var(--text);
+}
+
+[data-theme="dark"] .modal-header {
+  border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .modal-footer {
+  border-top-color: var(--border);
+}
+
+[data-theme="dark"] .settings-option {
+  border-bottom-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .settings-option:hover {
+  background: var(--hover-bg);
+}
+
+[data-theme="dark"] .form-group input {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .btn-cancel {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .btn-cancel:hover {
+  background: var(--hover-bg);
+}
+
+[data-theme="dark"] .activity-item {
+  border-bottom-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .btn-message {
+  background: var(--card);
+  color: var(--text);
+}
+
+[data-theme="dark"] .btn-message:hover {
+  background: var(--hover-bg);
+}
+
+[data-theme="dark"] .btn-share {
+  border-color: var(--border);
+  color: var(--text);
+}
+
+[data-theme="dark"] .btn-share:hover {
+  background: var(--hover-bg);
+}
+
+/* Force all text to be white in dark mode with high specificity */
+[data-theme="dark"] * {
+  color: inherit;
+}
+
+[data-theme="dark"] body {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .main,
+[data-theme="dark"] .layout,
+[data-theme="dark"] .feed,
+[data-theme="dark"] .sidebar {
+  color: #ffffff;
+}

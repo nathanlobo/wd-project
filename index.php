@@ -7,8 +7,25 @@ if (!$me) {
 }
 
 $db = db_connect();
+
+// Create saved_posts table if it doesn't exist
+$db->query("CREATE TABLE IF NOT EXISTS saved_posts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    post_id INT NOT NULL,
+    post_type VARCHAR(10) DEFAULT 'post',
+    saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_save (user_id, post_id, post_type),
+    INDEX idx_user_id (user_id)
+)");
+
 $posts = [];
-$res = $db->query('SELECT p.*, u.username, u.profile_pic, u.display_name FROM posts p JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC LIMIT 50');
+$user_id = $_SESSION['user_id'];
+$res = $db->query("SELECT p.*, u.username, u.profile_pic, u.display_name, 
+                   (SELECT COUNT(*) FROM saved_posts WHERE user_id = $user_id AND post_id = p.id AND post_type = 'post') as is_saved
+                   FROM posts p 
+                   JOIN users u ON p.user_id = u.id 
+                   ORDER BY RAND() LIMIT 50");
 while ($row = $res->fetch_assoc()) $posts[] = $row;
 $res->free();
 $db->close();
@@ -19,7 +36,9 @@ $db->close();
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Codegram — Home</title>
+    <script src="theme.js"></script>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="theme.css" />
     <style>
       .search {
         position: relative;
@@ -88,19 +107,27 @@ $db->close();
         color: #666;
         font-size: 14px;
       }
+      
+      [data-theme="dark"] .search-fullname,
+      [data-theme="dark"] .search-empty {
+        color: var(--text-secondary);
+      }
     </style>
   </head>
   <body>
     <header class="topbar">
       <div class="topbar-inner">
-        <div class="logo">
+        <a href="/Nathan/wd-project/" class="logo" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:8px;">
           <svg viewBox="0 0 24 24" class="camera" aria-hidden="true"><path d="M12 7a5 5 0 100 10 5 5 0 000-10z" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="3" width="20" height="18" rx="4" ry="4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
           <span class="brand">Codegram</span>
-        </div>
+        </a>
         <div class="search">
           <input type="search" id="searchInput" placeholder="Search" aria-label="Search" autocomplete="off" />
           <div class="search-dropdown" id="searchDropdown"></div>
         </div>
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span class="theme-toggle-slider">🌙</span>
+        </button>
       </div>
     </header>
 
@@ -118,15 +145,16 @@ $db->close();
                 </header>
                 <div class="post-image">
                   <?php if ($post['media_type'] === 'video'): ?>
-                    <video controls style="width:100%"><source src="<?php echo htmlspecialchars($post['media_path']); ?>"></video>
+                    <video controls style="width:100%;max-height:500px;object-fit:contain;background:#000"><source src="<?php echo htmlspecialchars($post['media_path']); ?>"></video>
                   <?php else: ?>
-                    <img src="<?php echo htmlspecialchars($post['media_path']); ?>" alt="post image" style="width:100%;display:block">
+                    <img src="<?php echo htmlspecialchars($post['media_path']); ?>" alt="post image" style="width:100%;max-height:500px;object-fit:contain;display:block;background:#f5f5f5">
                   <?php endif; ?>
                 </div>
                 <div class="post-actions">
                   <button class="btn like" aria-pressed="false">♡</button>
                   <button class="btn">💬</button>
                   <div class="spacer"></div>
+                  <button class="btn save" data-post-id="<?php echo $post['id']; ?>" title="<?php echo $post['is_saved'] ? 'Unsave' : 'Save'; ?>" onclick="savePost(this, <?php echo $post['id']; ?>)" style="color:<?php echo $post['is_saved'] ? '#ffc107' : 'inherit'; ?>">🔖</button>
                 </div>
                 <div class="post-likes">— likes</div>
                 <div class="post-caption"><strong><?php echo htmlspecialchars($post['username']); ?></strong> <?php echo htmlspecialchars($post['caption']); ?></div>
@@ -193,6 +221,33 @@ $db->close();
           searchDropdown.classList.add('active');
         }
       });
+      
+      // Save post functionality
+      async function savePost(element, postId) {
+        try {
+          const response = await fetch('api/save_post.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `post_id=${postId}&type=post`
+          });
+          const data = await response.json();
+          
+          if (data.success) {
+            // Toggle saved state visually
+            if (data.saved) {
+              element.style.color = '#ffc107';
+              element.title = 'Unsave';
+            } else {
+              element.style.color = 'inherit';
+              element.title = 'Save';
+            }
+          }
+        } catch (error) {
+          console.error('Save error:', error);
+        }
+      }
     </script>
   </body>
 </html>
