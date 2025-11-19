@@ -117,35 +117,22 @@ if (!$user) {
                     
                     <div class="profile-stats">
                         <div class="stat">
-                            <span class="stat-count"><?php echo $post_count; ?></span>
+                            <span class="stat-count"><strong><?php echo number_format($post_count); ?></strong></span>
                             <span class="stat-label">posts</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-count"><?php echo $follower_count; ?></span>
+                            <span class="stat-count"><strong><?php echo number_format($follower_count); ?></strong></span>
                             <span class="stat-label">followers</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-count"><?php echo $following_count; ?></span>
+                            <span class="stat-count"><strong><?php echo number_format($following_count); ?></strong></span>
                             <span class="stat-label">following</span>
                         </div>
                     </div>
                     
                     <div class="profile-bio">
-                        <p class="profile-name"><?php echo htmlspecialchars($user['display_name'] ?: $user['username']); ?></p>
+                        <p class="profile-name"><strong><?php echo htmlspecialchars($user['display_name'] ?: $user['username']); ?></strong></p>
                         <p class="bio-text"><?php echo !empty($user['bio']) ? nl2br(htmlspecialchars($user['bio'])) : 'No bio yet.'; ?></p>
-                    </div>
-                    
-                    <div class="profile-actions">
-                        <button class="btn-action btn-follow">Follow</button>
-                        <button class="btn-action btn-share">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="18" cy="5" r="3"></circle>
-                                <circle cx="6" cy="12" r="3"></circle>
-                                <circle cx="18" cy="19" r="3"></circle>
-                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                            </svg>
-                        </button>
                     </div>
                 </div>
             </header>
@@ -306,13 +293,77 @@ if (!$user) {
         </div>
     </main>
     
-    <!-- Lightbox for viewing posts -->
-    <div id="lightbox" class="lightbox" style="display:none;">
-        <span id="close-lightbox" class="close-lightbox">&times;</span>
-        <div id="lightbox-content"></div>
+    <!-- Instagram-style Lightbox Modal -->
+    <div id="lightbox" class="lightbox-modal">
+        <div class="lightbox-overlay"></div>
+        <button class="lightbox-close" id="close-lightbox">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+        <div class="lightbox-content">
+            <div class="lightbox-media-container" id="lightbox-media"></div>
+        </div>
     </div>
     
     <script>
+        // Instagram-style Lightbox
+        const lightbox = document.getElementById('lightbox');
+        const lightboxMedia = document.getElementById('lightbox-media');
+        const closeLightboxBtn = document.getElementById('close-lightbox');
+        
+        function openLightbox(mediaElement) {
+            const img = mediaElement.querySelector('img');
+            const video = mediaElement.querySelector('video');
+            
+            if (img) {
+                lightboxMedia.innerHTML = `<img src="${img.src}" class="lightbox-img" alt="Post">`;
+            } else if (video) {
+                lightboxMedia.innerHTML = `
+                    <video src="${video.src}" class="lightbox-video" controls autoplay loop>
+                        Your browser does not support the video tag.
+                    </video>`;
+            }
+            
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+            
+            // Stop and clean up video
+            const video = lightboxMedia.querySelector('video');
+            if (video) {
+                video.pause();
+                video.currentTime = 0;
+            }
+            
+            // Clean up media after animation
+            setTimeout(() => {
+                lightboxMedia.innerHTML = '';
+            }, 300);
+        }
+        
+        // Close button
+        closeLightboxBtn.addEventListener('click', closeLightbox);
+        
+        // Close on overlay click
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox || e.target.classList.contains('lightbox-overlay')) {
+                closeLightbox();
+            }
+        });
+        
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                closeLightbox();
+            }
+        });
+        
         // Tab switching
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -325,63 +376,53 @@ if (!$user) {
                 // Add active to clicked tab
                 this.classList.add('active');
                 document.getElementById(tabName + '-tab').style.display = 'block';
+                
+                // Re-initialize hover effects and click handlers for newly visible items
+                initializeGridItems();
             });
         });
         
-        // Video playback on hover
-        document.querySelectorAll('.grid-item').forEach(item => {
-            const video = item.querySelector('video');
-            if (video) {
-                item.addEventListener('mouseenter', () => {
-                    video.play();
-                });
-                item.addEventListener('mouseleave', () => {
-                    video.pause();
-                    video.currentTime = 0;
-                });
-                // Click to play/pause
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (video.paused) {
-                        video.play();
-                    } else {
-                        video.pause();
-                    }
-                });
-            }
-        });
-        
-        // Lightbox for viewing posts/videos
-        const lightbox = document.getElementById('lightbox');
-        const lightboxContent = document.getElementById('lightbox-content');
-        const closeLightbox = document.getElementById('close-lightbox');
-        
-        document.querySelectorAll('.grid-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                const img = item.querySelector('img');
+        // Function to initialize grid items (hover effects and click handlers)
+        function initializeGridItems() {
+            // Remove old listeners by cloning (prevents duplicate listeners)
+            document.querySelectorAll('.grid-item').forEach(item => {
+                // Add click handler using event delegation approach
+                item.style.cursor = 'pointer';
+                
+                // Video hover effects
                 const video = item.querySelector('video');
-                
-                if (img) {
-                    lightboxContent.innerHTML = `<img src="${img.src}" style="max-width:90vw;max-height:90vh;object-fit:contain;">`;
-                } else if (video) {
-                    lightboxContent.innerHTML = `<video src="${video.src}" controls autoplay style="max-width:90vw;max-height:90vh;object-fit:contain;"></video>`;
+                if (video) {
+                    // Remove old listeners
+                    const newItem = item.cloneNode(true);
+                    item.parentNode.replaceChild(newItem, item);
+                    
+                    // Add new listeners to the fresh clone
+                    const newVideo = newItem.querySelector('video');
+                    newItem.addEventListener('mouseenter', () => {
+                        newVideo.play().catch(e => {});
+                    });
+                    newItem.addEventListener('mouseleave', () => {
+                        newVideo.pause();
+                        newVideo.currentTime = 0;
+                    });
+                    newItem.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        openLightbox(newItem);
+                    });
+                } else {
+                    // For images, just add click handler
+                    const newItem = item.cloneNode(true);
+                    item.parentNode.replaceChild(newItem, item);
+                    newItem.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        openLightbox(newItem);
+                    });
                 }
-                
-                lightbox.style.display = 'flex';
             });
-        });
+        }
         
-        closeLightbox.addEventListener('click', () => {
-            lightbox.style.display = 'none';
-            lightboxContent.innerHTML = '';
-        });
-        
-        lightbox.addEventListener('click', (e) => {
-            if (e.target === lightbox) {
-                lightbox.style.display = 'none';
-                lightboxContent.innerHTML = '';
-            }
-        });
+        // Initialize on page load
+        initializeGridItems();
     </script>
 </body>
 </html>

@@ -30,6 +30,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Increment comment count
     $db->query("UPDATE codeas SET comments_count = comments_count + 1 WHERE id = $codea_id");
     
+    // Get codea owner to send notification
+    $stmt = $db->prepare('SELECT user_id FROM codeas WHERE id = ?');
+    $stmt->bind_param('i', $codea_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $codea = $result->fetch_assoc();
+    $stmt->close();
+    
+    // Send notification to codea owner (if not commenting on own codea)
+    if ($codea && $codea['user_id'] != $_SESSION['user_id']) {
+        $message = 'commented on your codea';
+        $stmt = $db->prepare('INSERT INTO notifications (user_id, from_user_id, type, reference_id, message, created_at) VALUES (?, ?, "comment", ?, ?, NOW())');
+        $stmt->bind_param('iiis', $codea['user_id'], $_SESSION['user_id'], $codea_id, $message);
+        $stmt->execute();
+        $stmt->close();
+    }
+    
     $db->close();
     echo json_encode(['success' => true]);
     exit;

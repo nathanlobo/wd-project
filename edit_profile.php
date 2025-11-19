@@ -110,7 +110,9 @@ $db->close();
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Edit Profile - Codegram</title>
+  <script src="theme.js"></script>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="theme.css">
   <link rel="stylesheet" href="profile.css">
   <style>
     .edit-profile-container {
@@ -321,16 +323,77 @@ $db->close();
             border-radius: 0;
         }
     }
+
+    /* Dark Mode Support */
+    [data-theme="dark"] .edit-profile-container {
+        background: var(--card-bg);
+        border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .edit-header {
+        border-bottom-color: var(--border-color);
+        color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .form-label {
+        color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .form-input,
+    [data-theme="dark"] .form-textarea {
+        background: var(--bg-primary);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .form-input:focus,
+    [data-theme="dark"] .form-textarea:focus {
+        border-color: #0095f6;
+    }
+
+    [data-theme="dark"] .form-helper {
+        color: var(--text-secondary);
+    }
+
+    [data-theme="dark"] .btn-cancel {
+        background: transparent;
+        border-color: var(--border-color);
+        color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .btn-cancel:hover {
+        background: var(--hover-bg);
+    }
+
+    [data-theme="dark"] .form-actions {
+        border-top-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .success-banner {
+        background: #1e4620;
+        color: #7fe87f;
+        border-bottom-color: #2d5f2f;
+    }
+
+    [data-theme="dark"] .error-banner {
+        background: #4a1a1a;
+        color: #ff6b6b;
+        border-bottom-color: #5f2020;
+    }
   </style>
 </head>
 <body>
     <div class="topbar">
         <div class="topbar-inner">
-            <a class="logo" href="/Nathan/wd-project/">
+            <a class="logo" href="/Nathan/wd-project/" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:8px;">
+                <svg viewBox="0 0 24 24" class="camera" aria-hidden="true"><path d="M12 7a5 5 0 100 10 5 5 0 000-10z" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="3" width="20" height="18" rx="4" ry="4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
                 <span class="brand">Codegram</span>
             </a>
             <div class="icons">
-                <a href="profile" class="icon" title="Profile">👤</a>
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                    <span class="theme-toggle-slider">🌙</span>
+                </button>
+                <a href="profile.php" class="icon" title="Profile">👤</a>
                 <a href="logout.php" class="icon" title="Logout">🚪</a>
             </div>
         </div>

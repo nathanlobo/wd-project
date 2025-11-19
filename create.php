@@ -336,10 +336,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
   <header class="topbar">
     <div class="topbar-inner">
-      <div class="logo">
+      <a href="/Nathan/wd-project/" class="logo" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:8px;">
         <svg viewBox="0 0 24 24" class="camera" aria-hidden="true"><path d="M12 7a5 5 0 100 10 5 5 0 000-10z" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="3" width="20" height="18" rx="4" ry="4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
         <span class="brand">Codegram</span>
-      </div>
+      </a>
       <div style="flex:1"></div>
       <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
         <span class="theme-toggle-slider">🌙</span>

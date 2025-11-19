@@ -261,6 +261,72 @@ $db->close();
       color: #666;
       margin-top: 4px;
     }
+
+    .comment-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+
+    .comment-action-btn {
+      background: none;
+      border: none;
+      color: #8e8e8e;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 0;
+      transition: color 0.2s;
+    }
+
+    .comment-action-btn:hover {
+      color: #262626;
+    }
+
+    .comment-action-btn.liked {
+      color: #ed4956;
+    }
+
+    .comment-action-btn.delete {
+      color: #ed4956;
+    }
+
+    .comment-edit-input {
+      width: 100%;
+      border: 1px solid #e6e6e6;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      margin-top: 8px;
+      background: white;
+      color: #262626;
+    }
+
+    .comment-edit-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .comment-edit-btn {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    .comment-save-btn {
+      background: #0095f6;
+      color: white;
+    }
+
+    .comment-cancel-btn {
+      background: #efefef;
+      color: #262626;
+    }
     
     .comment-input-container {
       border-top: 1px solid #e6e6e6;
@@ -613,14 +679,21 @@ $db->close();
         const list = document.getElementById('commentsList');
         if (data.comments && data.comments.length > 0) {
           list.innerHTML = data.comments.map(c => `
-            <div class="comment-item">
+            <div class="comment-item" id="codea-comment-${c.id}">
               <img src="${c.profile_pic || 'Media/dp/default.png'}" class="comment-avatar">
               <div class="comment-content">
                 <div>
                   <span class="comment-username">${c.username}</span>
-                  <span class="comment-text">${c.comment}</span>
+                  <span class="comment-text" id="codea-comment-text-${c.id}">${c.comment}</span>
                 </div>
-                <div class="comment-time">${timeAgo(c.created_at)}</div>
+                <div class="comment-actions">
+                  <span class="comment-time">${timeAgo(c.created_at)}</span>
+                  <button class="comment-action-btn" onclick="likeCodeaComment(${c.id})" id="codea-like-btn-${c.id}">Like</button>
+                  ${c.user_id == <?php echo $_SESSION['user_id']; ?> ? `
+                    <button class="comment-action-btn" onclick="editCodeaComment(${c.id})">Edit</button>
+                    <button class="comment-action-btn delete" onclick="deleteCodeaComment(${c.id}, ${codeaId})">Delete</button>
+                  ` : ''}
+                </div>
               </div>
             </div>
           `).join('');
@@ -655,6 +728,112 @@ $db->close();
         }
       } catch (err) {
         console.error('Post comment error:', err);
+      }
+    }
+
+    // Delete codea comment
+    async function deleteCodeaComment(commentId, codeaId) {
+      if (!confirm('Delete this comment?')) return;
+      
+      try {
+        const res = await fetch('api/delete_comment.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ comment_id: commentId, type: 'codea' })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          await loadComments(codeaId);
+          // Update comment count
+          const codeaItem = document.querySelector(`[data-codea-id="${codeaId}"]`);
+          const countEl = codeaItem.querySelector('.codea-action:nth-child(2) .action-count');
+          countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1);
+        } else {
+          alert('Failed to delete comment');
+        }
+      } catch (err) {
+        console.error('Delete comment error:', err);
+      }
+    }
+
+    // Edit codea comment
+    let editingCodeaCommentId = null;
+    function editCodeaComment(commentId) {
+      if (editingCodeaCommentId) return;
+      editingCodeaCommentId = commentId;
+      
+      const commentText = document.getElementById(`codea-comment-text-${commentId}`);
+      const originalText = commentText.textContent;
+      
+      const editHTML = `
+        <input type="text" class="comment-edit-input" id="codea-edit-input-${commentId}" value="${originalText}">
+        <div class="comment-edit-actions">
+          <button class="comment-edit-btn comment-save-btn" onclick="saveCodeaCommentEdit(${commentId}, '${originalText}')">Save</button>
+          <button class="comment-edit-btn comment-cancel-btn" onclick="cancelCodeaCommentEdit(${commentId}, '${originalText}')">Cancel</button>
+        </div>
+      `;
+      
+      commentText.innerHTML = editHTML;
+      document.getElementById(`codea-edit-input-${commentId}`).focus();
+    }
+
+    async function saveCodeaCommentEdit(commentId, originalText) {
+      const input = document.getElementById(`codea-edit-input-${commentId}`);
+      const newText = input.value.trim();
+      
+      if (!newText) {
+        alert('Comment cannot be empty');
+        return;
+      }
+      
+      try {
+        const res = await fetch('api/edit_comment.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ comment_id: commentId, comment: newText, type: 'codea' })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          editingCodeaCommentId = null;
+          await loadComments(currentCodeaId);
+        } else {
+          alert('Failed to update comment');
+        }
+      } catch (err) {
+        console.error('Edit comment error:', err);
+      }
+    }
+
+    function cancelCodeaCommentEdit(commentId, originalText) {
+      const commentText = document.getElementById(`codea-comment-text-${commentId}`);
+      commentText.textContent = originalText;
+      editingCodeaCommentId = null;
+    }
+
+    // Like codea comment
+    async function likeCodeaComment(commentId) {
+      try {
+        const res = await fetch('api/like_comment.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ comment_id: commentId, type: 'codea' })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          const btn = document.getElementById(`codea-like-btn-${commentId}`);
+          if (data.liked) {
+            btn.classList.add('liked');
+            btn.textContent = 'Liked';
+          } else {
+            btn.classList.remove('liked');
+            btn.textContent = 'Like';
+          }
+        }
+      } catch (err) {
+        console.error('Like comment error:', err);
       }
     }
     
